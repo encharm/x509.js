@@ -1,0 +1,29 @@
+{
+  "name": "x509.js",
+  "version": "1.0.0",
+  "description": "parsing of x509 certificates and keys in javascript (via emscripten)",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CodeCharmLtd/x509.js.git"
+  },
+  "keywords": [
+    "x509",
+    "ssl",
+    "certificates"
+  ],
+  "author": "Damian Kaczmarek <rush@rushbase.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CodeCharmLtd/x509.js/issues"
+  },
+  "homepage": "https://github.com/CodeCharmLtd/x509.js",
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "mocha": "^2.0.1",
+    "should": "^4.3.0"
+  }
+}
