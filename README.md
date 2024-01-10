@@ -8,7 +8,53 @@ npm install x509.js
 ```
 
 ### Browser use
-TODO (accepting pull requests)
+
+```html
+<pre>
+Cert <input type="file" id="ui_fcert">
+Key  <input type="file" id="ui_fkey">
+</pre>
+<script>
+// Tests passed on Chrome 43 with a Blob.prototype.arrayBuffer() patch
+// Recommend to use Worker to avoid the global vars be messed up
+var w = new Worker(URL.createObjectURL(new Blob([`
+	// patch some nodejs enviroment
+	var __dirname = '${location.href.replace(/\/[^\/]*$/, '')}';
+	var module = {};
+	function require(e){
+		if(e == './em-x509') return t;
+		console.error('required module', e, 'not exists!');
+	}
+	// import modules
+	importScripts(__dirname + '/em-x509.js'); // this must be first
+	importScripts(__dirname + '/index.js'); // imported cppMapToObject and cppVectorToArray
+	onmessage = function(e){ // required an ArrayBuffer to call t.parseCert and t.parseKey
+		e.data.return = t[e.data.fn].apply(this, e.data.args);
+		if(e.data.fn == 'parseCert'){ // re-implemented part of parseCert because there's can't invoke "new Buffer(str, 'utf8').toString('binary')"
+			var out = e.data.return;
+			out.altNames = cppVectorToArray(out.altNames);
+			out.ocspList = cppVectorToArray(out.ocspList);
+			out.subject  = cppMapToObject(out.subject);
+			out.issuer   = cppMapToObject(out.issuer);
+		}
+		postMessage(e.data);
+	}
+`], { type: 'text/javascript' })));
+ui_fcert.onchange = function(){ // when open a cert file (.cer; .crt; .pem)
+	this.files[0].arrayBuffer().then(function(e){
+		w.postMessage({ fn: 'parseCert', args: [e] });
+	});
+};
+ui_fkey.onchange = function(){ // when open a private key file
+	this.files[0].arrayBuffer().then(function(e){
+		w.postMessage({ fn: 'parseKey', args: [e] });
+	});
+};
+w.onmessage = function(e){ // when parsed data
+	console.log(e.data.return);
+}
+</script>
+```
 
 ### Usage
 
